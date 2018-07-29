@@ -4,7 +4,7 @@
 <book xmlns="http://docbook.org/ns/docbook" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0" xml:lang="en">
 <info>
 <title>java-examples (0.0.1)</title>
-<date>2018-07-29 18:12:21 UTC</date>
+<date>2018-07-29 18:22:53 UTC</date>
 <author>
 <personname>
 <firstname>Maksim</firstname>
@@ -16,7 +16,7 @@
 <revhistory>
 <revision>
 <revnumber>0.0.1</revnumber>
-<date>2018-07-29 18:12:21 UTC</date>
+<date>2018-07-29 18:22:53 UTC</date>
 <authorinitials>MK</authorinitials>
 </revision>
 </revhistory>
@@ -68,7 +68,71 @@ bash /tmp/java-examples-0.0.1/bin/java-examples
 </chapter>
 <chapter xml:id="implementation">
 <title>Implementation</title>
-<simpara>TODO: implement documentation&#8230;&#8203;</simpara>
+<section xml:id="predicate-java-7-api">
+<title>predicate (java 7 API):</title>
+<formalpara>
+<title>impl</title>
+<para>
+<programlisting language="java" linenumbering="unnumbered">public class Java7Predicate {
+
+    public interface MyPredicate {
+        boolean test(final String value);
+    }
+
+    @RequiredArgsConstructor
+    public static class Is implements MyPredicate {
+        final String value;
+
+        @Override
+        public boolean test(String value) {
+            return value != null &amp;&amp; value.contains(this.value);
+        }
+    }
+
+    public static class IsRed implements MyPredicate {
+        @Override
+        public boolean test(final String value) {
+            return nonNull(value) &amp;&amp; value.toLowerCase().contains("red");
+        }
+    }
+
+    public static void sideEffect(final MyPredicate predicate) {
+        final List&lt;String&gt; list = Arrays.asList("ololo", "trololo", "red", "blue", "green", "red devil");
+        for (String i : list) {
+            if (predicate.test(i)) {
+                System.out.println("i = " + i);
+            }
+        }
+    }
+}</programlisting>
+</para>
+</formalpara>
+<formalpara>
+<title>test</title>
+<para>
+<programlisting language="java" linenumbering="unnumbered">@Slf4j
+@CaptureSystemOutput
+@DisplayName("test predicate API: java 7")
+class Java7PredicateTest {
+
+    @Test
+    @DisplayName("test positive")
+    void testPredicate(final CaptureSystemOutput.OutputCapture outputCapture) {
+
+        assertAll(() -&gt; {
+
+            sideEffect(new Java7Predicate.IsRed());
+            Assertions.assertThat(outputCapture.toString())
+                    .contains("i = red", "i = red devil");
+
+            sideEffect(new Java7Predicate.Is("green"));
+            Assertions.assertThat(outputCapture.toString().contains("t = green"));
+        });
+    }
+}</programlisting>
+</para>
+</formalpara>
+</section>
 </chapter>
 <chapter xml:id="links">
 <title>Links</title>

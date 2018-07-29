@@ -463,13 +463,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <span id="author" class="author">Maksim Kostromin</span><br>
 <span id="email" class="email"><a href="mailto:daggerok@gmail.com">daggerok@gmail.com</a></span><br>
 <span id="revnumber">version 0.0.1,</span>
-<span id="revdate">2018-07-29 18:12:21 UTC</span>
+<span id="revdate">2018-07-29 18:22:53 UTC</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#introduction">1. Introduction</a></li>
-<li><a href="#implementation">2. Implementation</a></li>
+<li><a href="#implementation">2. Implementation</a>
+<ul class="sectlevel2">
+<li><a href="#predicate-java-7-api">2.1. predicate (java 7 API):</a></li>
+</ul>
+</li>
 <li><a href="#links">3. Links</a></li>
 </ul>
 </div>
@@ -529,8 +533,70 @@ bash /tmp/java-examples-0.0.1/bin/java-examples
 <div class="sect1">
 <h2 id="implementation"><a class="anchor" href="#implementation"></a>2. Implementation</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>TODO: implement documentation&#8230;&#8203;</p>
+<div class="sect2">
+<h3 id="predicate-java-7-api"><a class="anchor" href="#predicate-java-7-api"></a>2.1. predicate (java 7 API):</h3>
+<div class="listingblock">
+<div class="title">impl</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class Java7Predicate {
+
+    public interface MyPredicate {
+        boolean test(final String value);
+    }
+
+    @RequiredArgsConstructor
+    public static class Is implements MyPredicate {
+        final String value;
+
+        @Override
+        public boolean test(String value) {
+            return value != null &amp;&amp; value.contains(this.value);
+        }
+    }
+
+    public static class IsRed implements MyPredicate {
+        @Override
+        public boolean test(final String value) {
+            return nonNull(value) &amp;&amp; value.toLowerCase().contains("red");
+        }
+    }
+
+    public static void sideEffect(final MyPredicate predicate) {
+        final List&lt;String&gt; list = Arrays.asList("ololo", "trololo", "red", "blue", "green", "red devil");
+        for (String i : list) {
+            if (predicate.test(i)) {
+                System.out.println("i = " + i);
+            }
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">test</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Slf4j
+@CaptureSystemOutput
+@DisplayName("test predicate API: java 7")
+class Java7PredicateTest {
+
+    @Test
+    @DisplayName("test positive")
+    void testPredicate(final CaptureSystemOutput.OutputCapture outputCapture) {
+
+        assertAll(() -&gt; {
+
+            sideEffect(new Java7Predicate.IsRed());
+            Assertions.assertThat(outputCapture.toString())
+                    .contains("i = red", "i = red devil");
+
+            sideEffect(new Java7Predicate.Is("green"));
+            Assertions.assertThat(outputCapture.toString().contains("t = green"));
+        });
+    }
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -556,7 +622,7 @@ bash /tmp/java-examples-0.0.1/bin/java-examples
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1<br>
-Last updated 2018-07-29 18:12:21 UTC
+Last updated 2018-07-29 18:22:53 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
