@@ -6,6 +6,7 @@ image:https://img.shields.io/bitbucket/pipelines/daggerok/java-examples.svg["Bui
 ////
 
 //tag::content[]
+in progress...
 
 Read link:https://daggerok.github.io/java-examples[project reference documentation]
 
