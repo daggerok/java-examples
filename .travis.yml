@@ -4,9 +4,11 @@ service:
 env:
   global:
   - TERM=dumb
+  - secure: WPou9qMnFvvUsWHnwg21Q6GvWPl05rnnTiZzOZS7a4WH/D6xqdhAJS3mLXRrJiz1YMAaPtMPUjdWut4oMKPdZDLmxz6+GLE48K/kvx5XaiPIl7/oAOi8FgcWL2yGOM01sv0vNQln6c3pOuxdJFpc+wPzqgPplubVXjhfrY03E0GKGi4YQRMR2ldWSVG3B9RmcQZ5+UAbnwqz2FFYeKctcKHhg7WOAQpdUIuSGo02ht5LCzmO62gDfUwHcdckFGPJMTGYdk8/7bamxzAevJQlsxydhNZ2fn+HUVr8ZAUVOZArKnjjIKkMxnfsT+kRUS3v0zkxqDa0PjkCwhaIMOOjDVYunZrLlO35q22DPR0XrnCGe0aw2Zk0lTXcnqJs3CuAiELAARFu/sahp+Yw3phKqnlwJON2Awsv2k8zBGgLbaSXSjpeC6qLxJdrzt7YxCBBmZO3LoXR0o/B96yirYlTr3uHFX27fx4qvoKWMfRGr1AOO7p/nFhReAz/wnwSdLNGscNsaLJjQt2FHHgiMcDgv2gtVX0gszp8AatdeL+InqncB5K8kkGzNcSRnGO9XZqDDsKfsMUiGxUkmPEyEzf/qWYpLGt7QyZBzdArhIu0rBl73pwLhug1BYrsVBcNUZ6KiofDBY3QxlhczdLoU0voVwlgw+Pz7iUjUooQ+PZ2Bgg=
 
 language: java
 jdk: oraclejdk8
+#jdk: oraclejdk10
 
 addons:
   apt:
@@ -38,7 +40,7 @@ script:
 - unzip -o ./build/distributions/java-examples-0.0.1.zip -d /tmp
 - bash /tmp/java-examples-0.0.1/bin/java-examples
 #
-- bash gradlew clean build composeUp
+- bash gradlew clean composeUp
 - bash gradlew composeDown
 #
 - bash mvnw clean package >/dev/null 2>&1
@@ -47,7 +49,18 @@ script:
 - bash mvnw com.dkanejs.maven.plugins:docker-compose-maven-plugin:1.0.1:up -P docker
 - bash mvnw com.dkanejs.maven.plugins:docker-compose-maven-plugin:1.0.1:down -P docker
 
-before_deploy: ./gradlew documentation
+before_cache:
+- bash -c 'for item in $(find ~/.gradle -name "*.lock"); do sudo rm -rf $item ; done'
+- ./gradlew --stop
+
+cache:
+  directories:
+  - $HOME/.m2
+  - $HOME/.gradle
+  - $HOME/.docker
+
+before_deploy:
+- ./mvnw -Pdocs
 
 deploy:
   provider: pages
@@ -59,12 +72,3 @@ deploy:
     branch: master
   local-dir: target/generated-docs
   target_branch: gh-pages
-
-before_cache:
-- bash -c 'for item in $(find ~/.gradle -name "*.lock"); do sudo rm -rf $item ; done'
-
-cache:
-  directories:
-  - $HOME/.m2
-  - $HOME/.gradle
-  - $HOME/.docker
