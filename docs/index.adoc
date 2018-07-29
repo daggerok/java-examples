@@ -38,7 +38,19 @@ include::../README.adoc[tags=content]
 
 == Implementation
 
-TODO: implement documentation...
+=== predicate (java 7 API):
+
+.impl
+[source,java]
+----
+include::../src/main/java/daggerok/java7/predicate/Java7Predicate.java[tags=content]
+----
+
+.test
+[source,java]
+----
+include::../src/test/java/daggerok/java7/predicate/Java7PredicateTest.java[tags=content]
+----
 
 == Links
 

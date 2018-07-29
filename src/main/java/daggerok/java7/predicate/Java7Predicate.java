@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
-
+//tag::content[]
 public class Java7Predicate {
 
     public interface MyPredicate {
@@ -40,3 +40,4 @@ public class Java7Predicate {
         }
     }
 }
+//end::content[]

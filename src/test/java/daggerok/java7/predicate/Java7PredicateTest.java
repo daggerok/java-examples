@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import static daggerok.java7.predicate.Java7Predicate.sideEffect;
 import static org.junit.jupiter.api.Assertions.*;
 
+//tag::content[]
 @Slf4j
 @CaptureSystemOutput
 @DisplayName("test predicate API: java 7")
@@ -29,3 +30,4 @@ class Java7PredicateTest {
         });
     }
 }
+//end::content[]
