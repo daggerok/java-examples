@@ -1,0 +1,70 @@
+service:
+- docker
+
+env:
+  global:
+  - TERM=dumb
+
+language: java
+jdk: oraclejdk8
+
+addons:
+  apt:
+    update: true
+    packages:
+    - sudo
+    - lsof
+    - bash
+    - unzip
+    - curl
+    - jq
+    - libxml2-utils
+    - docker-ce
+    - python-pip
+
+install: true
+before_script:
+- sudo pip install docker-compose httpie >/dev/null 2>&1
+- source <(curl -s https://raw.githubusercontent.com/daggerok/bash-functions/master/main.bash)
+
+script:
+- bash gradlew >/dev/null 2>&1
+- java -jar ./build/libs/*-all.jar
+#
+- bash gradlew clean installDist >/dev/null 2>&1
+- bash ./build/install/java-examples/bin/java-examples
+#
+- bash gradlew clean distZip >/dev/null 2>&1
+- unzip -o ./build/distributions/java-examples-0.0.1.zip -d /tmp
+- bash /tmp/java-examples-0.0.1/bin/java-examples
+#
+- bash gradlew clean build composeUp
+- bash gradlew composeDown
+#
+- bash mvnw clean package >/dev/null 2>&1
+- java -jar target/*-all.jar
+#
+- bash mvnw com.dkanejs.maven.plugins:docker-compose-maven-plugin:1.0.1:up -P docker
+- bash mvnw com.dkanejs.maven.plugins:docker-compose-maven-plugin:1.0.1:down -P docker
+
+before_deploy: ./gradlew documentation
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  # travis encrypt GITHUB_TOKEN=<your github repo token> --add
+  github-token: "$GITHUB_TOKEN"
+  keep-history: true
+  on:
+    branch: master
+  local-dir: target/generated-docs
+  target_branch: gh-pages
+
+before_cache:
+- bash -c 'for item in $(find ~/.gradle -name "*.lock"); do sudo rm -rf $item ; done'
+
+cache:
+  directories:
+  - $HOME/.m2
+  - $HOME/.gradle
+  - $HOME/.docker
