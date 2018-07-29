@@ -2,6 +2,7 @@ allprojects {
   // read more: https://docs.gradle.org/4.6/release-notes.html#junit-5-support
 
   dependencies {
+    testImplementation 'org.assertj:assertj-core:3.10.0'
     testImplementation "junit:junit:$junit4Version"
     testImplementation "org.hamcrest:hamcrest-core:$hamcrestVersion"
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
