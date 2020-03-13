@@ -1,17 +1,14 @@
 service:
 - docker
-
 env:
   global:
   - TERM=dumb
   - secure: WPou9qMnFvvUsWHnwg21Q6GvWPl05rnnTiZzOZS7a4WH/D6xqdhAJS3mLXRrJiz1YMAaPtMPUjdWut4oMKPdZDLmxz6+GLE48K/kvx5XaiPIl7/oAOi8FgcWL2yGOM01sv0vNQln6c3pOuxdJFpc+wPzqgPplubVXjhfrY03E0GKGi4YQRMR2ldWSVG3B9RmcQZ5+UAbnwqz2FFYeKctcKHhg7WOAQpdUIuSGo02ht5LCzmO62gDfUwHcdckFGPJMTGYdk8/7bamxzAevJQlsxydhNZ2fn+HUVr8ZAUVOZArKnjjIKkMxnfsT+kRUS3v0zkxqDa0PjkCwhaIMOOjDVYunZrLlO35q22DPR0XrnCGe0aw2Zk0lTXcnqJs3CuAiELAARFu/sahp+Yw3phKqnlwJON2Awsv2k8zBGgLbaSXSjpeC6qLxJdrzt7YxCBBmZO3LoXR0o/B96yirYlTr3uHFX27fx4qvoKWMfRGr1AOO7p/nFhReAz/wnwSdLNGscNsaLJjQt2FHHgiMcDgv2gtVX0gszp8AatdeL+InqncB5K8kkGzNcSRnGO9XZqDDsKfsMUiGxUkmPEyEzf/qWYpLGt7QyZBzdArhIu0rBl73pwLhug1BYrsVBcNUZ6KiofDBY3QxlhczdLoU0voVwlgw+Pz7iUjUooQ+PZ2Bgg=
-
 language: java
 jdk:
 - openjdk8
 - openjdk11
 python: 3.8
-
 addons:
   apt:
     update: true
@@ -25,55 +22,55 @@ addons:
     - httpie
     - docker-ce
     - docker-compose
-
 install: true
 before_script:
 - source <(curl -s https://raw.githubusercontent.com/daggerok/bash-functions/master/main.bash)
-
-script:
-- bash gradlew >/dev/null
-- java -jar ./build/libs/*-all.jar
-#
-- bash gradlew clean installDist >/dev/null
-- bash ./build/install/java-examples/bin/java-examples
-#
-- bash gradlew clean distZip >/dev/null
-- unzip -o ./build/distributions/java-examples-0.0.1.zip -d /tmp
-- bash /tmp/java-examples-0.0.1/bin/java-examples
-#
-- bash gradlew clean composeUp
-- bash gradlew composeDown
-#
-- bash mvnw clean package >/dev/null
-- java -jar target/*-all.jar
-#
-- bash mvnw com.dkanejs.maven.plugins:docker-compose-maven-plugin:1.0.1:up -P docker
-- bash mvnw com.dkanejs.maven.plugins:docker-compose-maven-plugin:1.0.1:down -P docker
-
+jobs:
+  includes:
+    - stage: test
+      name: tests
+      script:
+      - bash gradlew >/dev/null
+      - java -jar ./build/libs/*-all.jar
+      #
+      - bash gradlew clean installDist >/dev/null
+      - bash ./build/install/java-examples/bin/java-examples
+      #
+      - bash gradlew clean distZip >/dev/null
+      - unzip -o ./build/distributions/java-examples-0.0.1.zip -d /tmp
+      - bash /tmp/java-examples-0.0.1/bin/java-examples
+      #
+      - bash gradlew clean composeUp
+      - bash gradlew composeDown
+      #
+      - bash mvnw clean package >/dev/null
+      - java -jar target/*-all.jar
+      #
+      - bash mvnw com.dkanejs.maven.plugins:docker-compose-maven-plugin:1.0.1:up -P docker
+      - bash mvnw com.dkanejs.maven.plugins:docker-compose-maven-plugin:1.0.1:down -P docker
+    - stage: deploy
+      name: GitHub pages
+      before_deploy:
+      - ./mvnw -Pdocs
+      deploy:
+        provider: pages
+        skip-cleanup: true
+        keep-history: true
+        target_branch: gh-pages
+        github-token: "$GITHUB_TOKEN"
+        # travis encrypt GITHUB_TOKEN=..
+        local-dir: target/generated-docs
+        on:
+          branch: master
 before_cache:
 - |
   for item in $(find ~/.gradle -name "*.lock") ; do
     sudo rm -rf $item ;
   done
 - ./gradlew --stop
-
 cache:
   packages: true
   directories:
   - ~/.m2
   - ~/.gradle
   - ~/.docker
-
-before_deploy:
-- ./mvnw -Pdocs
-
-deploy:
-  provider: pages
-  skip-cleanup: true
-  # travis encrypt GITHUB_TOKEN=<your github repo token> --add
-  github-token: "$GITHUB_TOKEN"
-  keep-history: true
-  on:
-    branch: master
-  local-dir: target/generated-docs
-  target_branch: gh-pages
