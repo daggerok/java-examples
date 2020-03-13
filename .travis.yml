@@ -10,24 +10,24 @@ language: java
 jdk:
 - openjdk8
 - openjdk11
+python: 3.8
 
 addons:
   apt:
     update: true
     packages:
+    - jq
     - sudo
     - lsof
     - bash
-    - unzip
     - curl
-    - jq
-    - libxml2-utils
+    - unzip
+    - httpie
     - docker-ce
-    - python-pip
+    - docker-compose
 
 install: true
 before_script:
-- sudo pip install docker-compose httpie >/dev/null 2>&1
 - source <(curl -s https://raw.githubusercontent.com/daggerok/bash-functions/master/main.bash)
 
 script:
@@ -51,14 +51,18 @@ script:
 - bash mvnw com.dkanejs.maven.plugins:docker-compose-maven-plugin:1.0.1:down -P docker
 
 before_cache:
-- bash -c 'for item in $(find ~/.gradle -name "*.lock"); do sudo rm -rf $item ; done'
+- |
+  for item in $(find ~/.gradle -name "*.lock") ; do
+    sudo rm -rf $item ;
+  done
 - ./gradlew --stop
 
 cache:
+  packages: true
   directories:
-  - $HOME/.m2
-  - $HOME/.gradle
-  - $HOME/.docker
+  - ~/.m2
+  - ~/.gradle
+  - ~/.docker
 
 before_deploy:
 - ./mvnw -Pdocs
